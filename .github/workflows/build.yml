@@ -42,19 +42,26 @@ jobs:
         run: |
           VERSION=$(grep -E '^version=' gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
           [ -z "$VERSION" ] && VERSION="unknown"
+
           ECO=$(grep -E '^eco-version=' gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
           [ -z "$ECO" ] && ECO="unknown"
+
           TAG="v${VERSION}"
+
           JAR=\( (find bin -name "EcoEnchants v \){VERSION}.jar" 2>/dev/null | head -n1)
           [ -z "\( JAR" ] && JAR= \)(find bin -name "EcoEnchants v*.jar" 2>/dev/null | head -n1)
           [ -z "$JAR" ] && exit 1
+
           FINAL="EcoEnchants-${VERSION}.jar"
           cp "$JAR" "$FINAL"
+
+          TIME=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M:%S %Z')
+
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "eco=$ECO" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "jar=$FINAL" >> "$GITHUB_OUTPUT"
-          echo "time=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M:%S %Z')" >> "$GITHUB_OUTPUT"
+          echo "time=$TIME" >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@v6
         with:
