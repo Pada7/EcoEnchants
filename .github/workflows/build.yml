@@ -4,13 +4,15 @@ on:
   push:
     branches: [master, main]
   workflow_dispatch:
+  schedule:
+    - cron: '0 16 * * 0'
 
 permissions:
   contents: write
   actions: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: \( {{ github.workflow }}- \){{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -43,8 +45,8 @@ jobs:
           ECO=$(grep -E '^eco-version=' gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
           [ -z "$ECO" ] && ECO="unknown"
           TAG="v${VERSION}"
-          JAR=$(find bin -name "EcoEnchants v${VERSION}.jar" 2>/dev/null | head -n1)
-          [ -z "$JAR" ] && JAR=$(find bin -name "EcoEnchants v*.jar" 2>/dev/null | head -n1)
+          JAR=\( (find bin -name "EcoEnchants v \){VERSION}.jar" 2>/dev/null | head -n1)
+          [ -z "\( JAR" ] && JAR= \)(find bin -name "EcoEnchants v*.jar" 2>/dev/null | head -n1)
           [ -z "$JAR" ] && exit 1
           FINAL="EcoEnchants-${VERSION}.jar"
           cp "$JAR" "$FINAL"
