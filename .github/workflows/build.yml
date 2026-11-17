@@ -42,46 +42,21 @@ jobs:
       - name: Prepare release
         id: meta
         run: |
-          set -e
-
           VERSION=$(grep -E '^version=' gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
-          if [ -z "$VERSION" ]; then
-            VERSION="unknown"
-          fi
-
+          [ -z "$VERSION" ] && VERSION="unknown"
           ECO=$(grep -E '^eco-version=' gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
-          if [ -z "$ECO" ]; then
-            ECO="unknown"
-          fi
-
+          [ -z "$ECO" ] && ECO="unknown"
           TAG="v${VERSION}"
-
-          JAR=""
-          if [ -d bin ]; then
-            JAR=\( (find bin -name "EcoEnchants v \){VERSION}.jar" | head -n 1 || true)
-            if [ -z "$JAR" ]; then
-              JAR=$(find bin -name "EcoEnchants v*.jar" | head -n 1 || true)
-            fi
-          fi
-
-          if [ -z "$JAR" ]; then
-            echo "找不到编译产物 jar 文件"
-            ls -la bin/ || true
-            exit 1
-          fi
-
+          JAR=\( (find bin -name "EcoEnchants v \){VERSION}.jar" 2>/dev/null | head -n1)
+          [ -z "\( JAR" ] && JAR= \)(find bin -name "EcoEnchants v*.jar" 2>/dev/null | head -n1)
+          [ -z "$JAR" ] && exit 1
           FINAL="EcoEnchants-${VERSION}.jar"
           cp "$JAR" "$FINAL"
-
-          TIME=$(TZ=Asia/Shanghai date "+%Y-%m-%d %H:%M:%S %Z")
-
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "eco=$ECO" >> $GITHUB_OUTPUT
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "jar=$FINAL" >> $GITHUB_OUTPUT
-          echo "time=$TIME" >> $GITHUB_OUTPUT
-
-          echo "准备发布: $FINAL (tag=$TAG)"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "eco=$ECO" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "jar=$FINAL" >> "$GITHUB_OUTPUT"
+          echo "time=$(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M:%S %Z')" >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@v6
         with:
